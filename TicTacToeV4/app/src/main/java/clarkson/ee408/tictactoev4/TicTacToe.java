@@ -3,10 +3,12 @@ package clarkson.ee408.tictactoev4;
 public class TicTacToe {
     public static final int SIDE = 3;
     private int turn;
+    private int player;
     private int [][] game;
 
-    public TicTacToe( ) {
-        game = new int[SIDE][SIDE];
+    public TicTacToe(int player ) {
+        this.player = player
+        this.game = new int[SIDE][SIDE];
         resetGame( );
     }
 
@@ -86,7 +88,7 @@ public class TicTacToe {
 
     public String result( ) {
         if( whoWon( ) > 0 )
-            return "Player " + whoWon( ) + " won";
+            return "You Won";
         else if( canNotPlay( ) )
             return "Tie Game";
         else
