@@ -11,7 +11,10 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.os.Bundle;
-
+import android.os.Handler;
+import android.os.Looper;
+import java.util.Timer;
+import java.util.TimerTask;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,11 +23,49 @@ public class MainActivity extends AppCompatActivity {
     private Button [][] buttons;
     private TextView status;
 
+    private boolean shouldRequestMove;
+    private Handler handler;
+    private Timer timer;
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
+        setContentView(R.layour.activity_main);
+
+        handler = new Handler(Looper.getMainLooper());
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run(){
+                handler.post(new Runnable()){
+                    public void run(){
+                        requestMove();
+                    }
+                });
+
+            }
+        }, 0, DELAY);
         tttGame = new TicTacToe( );
         buildGuiByCode( );
+        updateTurnStatus();
+    }
+
+    private void sendMove(Event event){
+        SocketClient socketClient = SocketClient.getInstance();
+        Request request = new Request(RequestType.SEND_MOVE);
+        request.setData(event.getMove);
+
+        socketClient.sendRequest(request);
+    }
+    public void requestMove(){
+        SocketClient socketClient = SocketClient.getInstance();
+        Request request = new Request(RequestType.REQUEST_MOVE);
+        Response response = socketClient.sendRequest(request);
+
+        if (response != null && response.isValidMove()) {
+            update(response.getRow(), response.getCol());
+        }
     }
 
     public void buildGuiByCode( ) {
@@ -93,6 +134,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView( gridLayout );
     }
 
+    private void updateTurnStatus(){
+        if (isPlayerTurn) {
+            statusTextView.setText("Your Turn");
+            shouldRequestMove = true;
+            enableButtons(true);
+        } else{
+            statusTextView.setText("Waiting for Opponent");
+            shouldRequestMove = false;
+            enableButtons(false);
+        }
+    }
+
     public void update( int row, int col ) {
         int play = tttGame.play( row, col );
         if( play == 1 )
@@ -105,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
             status.setText( tttGame.result( ) );
             showNewGameDialog( );	// offer to play again
         }
+        isPlayerTurn = !isPlayerTurn;
+        updateTurnStatus();
     }
 
     public void enableButtons( boolean enabled ) {
@@ -122,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     public void showNewGameDialog( ) {
         AlertDialog.Builder alert = new AlertDialog.Builder( this );
         alert.setTitle( "TicTacToe Game" );
-        alert.setMessage( "Player" + X + "won; game is over" );
+        alert.setMessage( "Do you want to play again?" );
         PlayDialog playAgain = new PlayDialog( );
         alert.setPositiveButton( "YES", playAgain );
         alert.setNegativeButton( "NO", playAgain );

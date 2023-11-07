@@ -1,5 +1,5 @@
 package clarkson.ee408.tictactoev4;
-
+import src.main.java.clarkson.ee408.tictactoev4.MainActivity
 public class TicTacToe {
     public static final int SIDE = 3;
     private int turn;
@@ -84,11 +84,14 @@ public class TicTacToe {
             for( int col = 0; col < SIDE; col++ )
                 game[row][col] = 0;
         turn = 1;
+        updateTurnStatus();
     }
 
     public String result( ) {
-        if( whoWon( ) > 0 )
-            return "You Won";
+        if( whoWon() == player)
+            return ("Player" + whoWon() + "won");
+        else if(whoWon() != 0)
+            return "You Lost";
         else if( canNotPlay( ) )
             return "Tie Game";
         else
