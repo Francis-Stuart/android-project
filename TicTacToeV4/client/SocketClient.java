@@ -42,7 +42,7 @@ public class SocketClient {
     public Response sendRequest(Request request){
         Response response null;
         try{
-            socket = new Socket("server ip?", 5000);
+            socket = new Socket("128.153.187.3", 5000);
 
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getInputStream());

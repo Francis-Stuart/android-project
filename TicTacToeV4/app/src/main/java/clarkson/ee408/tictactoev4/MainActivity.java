@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }, 0, DELAY);
-        tttGame = new TicTacToe( );
+        tttGame = new TicTacToe(1);
         buildGuiByCode( );
         updateTurnStatus();
     }
