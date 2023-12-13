@@ -6,8 +6,8 @@ public class TicTacToe {
     private int player;
     private int [][] game;
 
-    public TicTacToe(int player ) {
-        this.player = player
+    public TicTacToe() {
+        this.player = getIntent().getIntExtra();
         this.game = new int[SIDE][SIDE];
         resetGame( );
     }

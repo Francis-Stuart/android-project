@@ -37,11 +37,24 @@ public class RegisterActivity extends AppCompatActivity {
         displayNameField = findViewById(R.id.editTextDisplayName);
 
         // TODO: Initialize Gson with null serialization option
+        gson = new Gson();
 
         //Adding Handlers
         //TODO: set an onclick listener to registerButton to call handleRegister()
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View view){
+                handleRegister();
+            }
+        });
 
         //TODO: set an onclick listener to loginButton to call goBackLogin()
+        loginButton.setOnClickListener(new View.OnClickListener){
+            @Override
+            public void onClick(View view){
+                goBackLogin();
+            }
+        }
     }
 
     /**
@@ -49,12 +62,23 @@ public class RegisterActivity extends AppCompatActivity {
      */
     public void handleRegister() {
         // TODO: declare local variables for username, password, confirmPassword and displayName. Initialize their values with their corresponding EditText
-
+        String username = usernameField.getText().toString().trim();
+        String password = passwordField.getText().toString().trim();
+        String confirmPassword = confirmPasswordField.getText().toString().trim();
+        String displayName = displayNameField.getText().toString().trim();
         // TODO: verify that all fields are not empty before proceeding. Toast with the error message
-
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || displayName.isEmpty()) {
+            Toast.makeText(this, "All fields must be filled", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // TODO: verify that password is the same af confirm password. Toast with the error message
-
+        if (!password.equals(confirmPassword)) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // TODO: Create User object with username, display name and password and call submitRegistration()
+        User user = new User(username, displayName, password);
+        submitRegistration(user);
     }
 
     /**
@@ -63,6 +87,27 @@ public class RegisterActivity extends AppCompatActivity {
      */
     void submitRegistration(User user) {
         //TODO: Send a REGISTER request to the server, if SUCCESS reponse, call goBackLogin(). Else, Toast the error message
+        SocketClient.getInstance().sendRequest(Request.register(user), new SocketClient.ResponseListener()) {
+            @Override
+            public void onResponse(Response response){
+                if (response.isSuccess()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(RegisterActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                            goBackLogin();
+                        }
+                    });
+                } else {
+                    final String errorMessage = response.getMessage();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(RegisterActivity.this, "Registration failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        }
     }
 
     /**
@@ -70,6 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
      */
     private void goBackLogin() {
         //TODO: Close this activity by calling finish(), it will automatically go back to its parent (i.e,. LoginActivity)
+        finish();
     }
 
 }

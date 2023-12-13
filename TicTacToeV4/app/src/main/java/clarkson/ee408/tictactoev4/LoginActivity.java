@@ -42,8 +42,15 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordField.getText().toString();
 
         // TODO: verify that all fields are not empty before proceeding. Toast with the error message
-
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Username and password are required", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // TODO: Create User object with username and password and call submitLogin()
+        submitLogin()
+        User user = new User(username, password);
+        submitLogin(user);
+    }
     }
 
     /**
@@ -52,6 +59,17 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void submitLogin(User user) {
         // TODO: Send a LOGIN request, If SUCCESS response, call gotoPairing(), else, Toast the error message from sever
+        gotoPairing(), else, Toast the error message from server
+
+        boolean loginSuccessful = checkLogin(user);
+
+        if (loginSuccessful) {
+            gotoPairing();
+        } else {
+            Toast.makeText(this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     }
 
     /**
@@ -60,6 +78,10 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void gotoPairing(String username) {
         // TODO: start PairingActivity and pass the username
+        Intent intent = new Intent(this, PairingActivity.class);
+        intent.putExtra("USERNAME", username); // Pass the username as an extra
+        startActivity(intent);
+        }
     }
 
     /**
@@ -67,5 +89,8 @@ public class LoginActivity extends AppCompatActivity {
      */
     public void gotoRegister() {
         // TODO: start RegisterActivity
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
+        }
     }
 }

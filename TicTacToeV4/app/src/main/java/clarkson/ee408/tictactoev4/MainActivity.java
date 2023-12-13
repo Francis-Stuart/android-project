@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         tttGame = new TicTacToe(1);
         buildGuiByCode( );
         updateTurnStatus();
+        shouldRequestMove = true;
     }
 
     private void sendMove(Event event){
@@ -65,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (response != null && response.isValidMove()) {
             update(response.getRow(), response.getCol());
+        }else if (!response.isActive()) {
+            status.setBackgroundColor( Color.RED );
+            status.setText( tttGame.result( ) );
+            shouldRequestMove = false;
+            tttgame = null;
         }
     }
 
@@ -137,11 +143,9 @@ public class MainActivity extends AppCompatActivity {
     private void updateTurnStatus(){
         if (isPlayerTurn) {
             statusTextView.setText("Your Turn");
-            shouldRequestMove = true;
             enableButtons(true);
         } else{
             statusTextView.setText("Waiting for Opponent");
-            shouldRequestMove = false;
             enableButtons(false);
         }
     }
@@ -203,9 +207,51 @@ public class MainActivity extends AppCompatActivity {
                 resetButtons( );
                 status.setBackgroundColor( Color.BLUE );
                 status.setText( tttGame.result( ) );
+                shouldRequestMove = true;
             }
             else if( id == -2 ) // NO button
                 MainActivity.this.finish( );
         }
+        // Function to send an ABORT_GAME request to the server
+        public void abortGame() {
+            appExecutors.networkIO().execute(() -> {
+                try {
+                    // Assuming SocketClient has a method sendRequest for sending requests
+                    socketClient.sendRequest("ABORT_GAME");
+
+                    // If successful, show a success message on the UI thread
+                    appExecutors.mainThread().execute(() -> showToast("Game aborted successfully"));
+                } catch (Exception e) {
+                    // If there's an error, show a failure message on the UI thread
+                    appExecutors.mainThread().execute(() -> showToast("Failed to abort game: " + e.getMessage()));
+                }
+            });
+        }
+        // Function to send a COMPLETE_GAME request to the server
+        public void completeGame() {
+            appExecutors.networkIO().execute(() -> {
+                try {
+                    // Assuming SocketClient has a method sendRequest for sending requests
+                    socketClient.sendRequest("COMPLETE_GAME");
+
+                    // If successful, show a success message on the UI thread
+                    appExecutors.mainThread().execute(() -> showToast("Game completed successfully"));
+                } catch (Exception e) {
+                    // If there's an error, show a failure message on the UI thread
+                    appExecutors.mainThread().execute(() -> showToast("Failed to complete game: " + e.getMessage()));
+                }
+            });
+        }
+
+        // Helper function to show a Toast message
+        private void showToast(String message) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+
     }
+
+
+
+
+
 }
